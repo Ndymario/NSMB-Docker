@@ -158,7 +158,7 @@ else:
     shutil.copyfile(arm9_json, local_arm9_json)
 
 if local_ncpatcher_json.is_file() and calculate_file_sha256(local_ncpatcher_json) != sha256_hashes["ncpatcher"]:
-    print("[i]\tWarning: the ncatcher in this folder is not the NSMB-Docker one. There be dragons!")
+    print("[i]\tWarning: the ncpatcher.json in this folder is not the NSMB-Docker one. There be dragons!")
 
 else:
     shutil.copyfile(ncpatcher_json, local_ncpatcher_json)
