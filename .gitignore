@@ -1,0 +1,21 @@
+# Libraries
+/lib/
+/include/
+symbols9.x
+symbols7.x
+
+# IDE
+/.vs/
+/.vscode/
+/.venv/
+
+# Filesystem
+/nitrofs/
+
+# ROM
+NSMB.nds
+NSMB.sav
+
+# NCPatcher
+/backup/
+/build/
