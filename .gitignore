@@ -13,8 +13,8 @@ symbols7.x
 /nitrofs/
 
 # ROM
-NSMB.nds
-NSMB.sav
+*.nds
+*.sav
 
 # NCPatcher
 /backup/
