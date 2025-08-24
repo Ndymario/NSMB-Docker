@@ -14,20 +14,18 @@ import sys
 import subprocess
 import shutil
 import os
-import time
 
-scripts_folder = Path("/data/scripts")
 include_folder = Path("/data/include")
+scripts_folder = Path("/app/scripts/")
 clean_rom = Path("/data/nsmb.nds")
-arm9_json = Path("/data/arm9.json")
-ncpatcher_json = Path("/data/ncpatcher.json")
-buildrules_txt = Path("/data/buildrules.txt")
+arm9_json = Path("/app/arm9.json")
+ncpatcher_json = Path("/app/ncpatcher.json")
+buildrules_txt = Path("/app/buildrules.txt")
 sha256_hashes = {"nsmb": "9f67fef1b4c73e966767f6153431ada3751dc1b0da2c70f386c14a5e3017f354",
-                "arm9": "c2e5be51945dd863ab611ba144f4b8e792641a3a242c97980db4abc6fce266c3",
+                "arm9": "ff1272fa2fc72350fdd1deee4873348a1bfa37c6eb944ddc46eed7f3ffa8c611",
                 "ncpatcher": "29833ee67f0ffaaa61872c3456ce01eae1733a99c1869b851eff1a2f74176f5c",
                 "buildrules": "1e77a9db9625fa88e23230d6ed92956e40882cec10a496f9937344cbf885a957"}
 
-local_scripts_folder = Path("/workspace/scripts")
 local_include_folder = Path("/workspace/include")
 local_clean_rom = Path("/workspace/nsmb.nds")
 local_arm9_json = Path("/workspace/arm9.json")
@@ -39,6 +37,7 @@ local_final_rom = Path("/workspace/final.nds")
 
 
 def calculate_file_sha256(filepath):
+    """Calcaulates the SHA256 hash of the provided file"""
     sha256_hash = hashlib.sha256()
     with open(filepath, "rb") as f:
         # Read and update hash string value in blocks
@@ -59,14 +58,6 @@ def run_command(cmd, cwd=None, check=True):
         sys.exit(1)
 
     return result
-
-
-# If the scripts have not been copied to the data volume, try to now
-if not scripts_folder.is_dir():
-    if not local_scripts_folder.is_dir():
-        raise FileNotFoundError("[!]\tCould not find NSMB-Docker scripts folder (Error Code 1)")
-    
-    shutil.move(local_scripts_folder, scripts_folder)
 
 # If a clean ROM has not been copied to the data volume, try to now
 if not clean_rom.is_file():
@@ -92,58 +83,6 @@ if not include_folder.is_dir():
 
     shutil.move(local_include_folder, include_folder)
 
-# If a clean arm9.json has not been copied to the data volume, try to now
-if not arm9_json.is_file():
-    if not local_arm9_json.is_file():
-        raise FileNotFoundError("[!]\tCould not find a useable arm9.json (Error Code 5)")
-    
-    if calculate_file_sha256(local_arm9_json) != sha256_hashes["arm9"]:
-        raise ValueError("[!]\tThe arm9.json provided does not seem to be the NSMB-Docker arm9.json (Error Code 6)")
-    
-    print("[i]\tarm9.json found: moving to the data volume")
-
-    shutil.move(local_arm9_json, arm9_json)
-
-# If a clean ncpatcher.json has not been copied to the data volume, try to now
-if not ncpatcher_json.is_file():
-    if not local_ncpatcher_json.is_file():
-        raise FileNotFoundError("[!]\tCould not find a useable ncpatcher.json (Error Code 7)")
-    
-    if calculate_file_sha256(local_ncpatcher_json) != sha256_hashes["ncpatcher"]:
-        raise ValueError("[!]\tThe ncpatcher.json provided does not seem to be the NSMB-Docker ncpatcher.json (Error Code 8)")
-    
-    print("[i]\tncpatcer.json found: moving to the data volume")
-
-    shutil.move(local_ncpatcher_json, ncpatcher_json)
-
-# If a clean buildrules.txt has not been copied to the data volume, try to now
-if not buildrules_txt.is_file():
-    if not local_buildrules_txt.is_file():
-        raise FileNotFoundError("[!]\tCould not find a useable buildrules.txt (Error Code 9)")
-    
-    if calculate_file_sha256(local_buildrules_txt) != sha256_hashes["buildrules"]:
-        raise ValueError("[!]\tThe buildrules.txt provided does not seem to be the NSMB-Docker buildrules.txt (Error Code 10)")
-    
-    print("[i]\tbuildrules.txt found: moving to the data volume")
-
-    shutil.move(local_buildrules_txt, buildrules_txt)
-
-# Copy the scripts folder into the current workspace if it doesn't already exist
-if not local_scripts_folder.is_dir():
-    try:
-        shutil.copytree(scripts_folder, local_scripts_folder)
-    except Exception as e:
-        print("[!]\tFailed to copy the scripts folder!")
-        exit(1)
-
-# Copy the include folder into the current workspace if it doesn't already exist
-if not local_include_folder.is_dir():
-    try:
-        shutil.copytree(include_folder, local_include_folder)
-    except Exception as e:
-        print("[!]\tFailed to copy the include folder!")
-        exit(1)
-
 # Copy the NCPatcher related files into the current workspace. Otherwise, warn that whatever is in the workspace is being used.
 if local_buildrules_txt.is_file() and calculate_file_sha256(local_buildrules_txt) != sha256_hashes["buildrules"]:
     print("[i]\tWarning: the buildrules.txt in this folder is not the NSMB-Docker one. There be dragons!")
@@ -165,7 +104,7 @@ else:
 
 # Apply code patches via insert_code.py (Thanks Gamerator!)
 insert_code_cmd = [
-        sys.executable, '/data/scripts/insert_code.py',
+        sys.executable, scripts_folder / "insert_code.py",
         clean_rom, local_code_rom,
         "--temp-dir", "nsmb"
     ]
@@ -174,7 +113,7 @@ run_command(insert_code_cmd, Path("/workspace/"))
 
 # Bundle ROM contents into final .nds via insert_files.py (Thanks Gamerator!)
 insert_files_cmd = [
-        sys.executable, '/data/scripts/insert_files.py',
+        sys.executable, scripts_folder / "insert_files.py",
         local_code_rom, local_final_rom,
     ]
 
