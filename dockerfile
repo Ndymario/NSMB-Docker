@@ -55,13 +55,19 @@ RUN git clone https://github.com/TheGameratorT/NCPatcher.git /opt/NCPatcher && \
 ENV PATH="/opt/NCPatcher/build:${PATH}"
 
 # Clone the latest NSMB Code Reference
-RUN git clone https://github.com/MammaMiaTeam/NSMB-Code-Reference.git /opt/NSMB-Code-Reference/
+ARG CODE_TEMPLATE_COMMIT=""
+RUN if [ -n "$CODE_TEMPLATE_COMMIT" ]; then \
+      git clone https://github.com/MammaMiaTeam/NSMB-Code-Reference.git /opt/NSMB-Code-Reference && \
+      cd /opt/NSMB-Code-Reference && \
+      git checkout "$CODE_TEMPLATE_COMMIT"; \
+    else \
+      git clone https://github.com/MammaMiaTeam/NSMB-Code-Reference.git /opt/NSMB-Code-Reference/; \
+    fi
 
 # Copy scripts & NSMB-Docker NCPatcher configuration
 RUN mkdir -p /app/scripts
 COPY ./scripts/ /app/scripts
 COPY ./arm9.json /app/
-COPY ./buildrules.txt /app/
 COPY ./ncpatcher.json /app/
 
 # Create the build folder
