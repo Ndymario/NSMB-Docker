@@ -1,8 +1,9 @@
-name: Create and publish a Docker image
+name: Create and publish NSMB-Docker image
 
 on:
   push:
-    branches: ['main']
+    branches: ['main', 'stable', 'dev']
+    tags: ['v*']
 
 env:
   REGISTRY: ghcr.io
@@ -33,17 +34,39 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=ref,event=branch,pattern=main
+            type=ref,event=branch,pattern=stable
+            type=ref,event=branch,pattern=dev
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=short
 
-      - name: Build and push Docker image with ARCH=x86_64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and push Docker image (multi-arch)
         id: push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            ARCH=x86_64
+            ARCH=linux/amd64=ARCH=x86_64
+            ARCH=linux/arm64=ARCH=aarch64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -51,3 +74,15 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  cleanup-old-images:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Delete old container images
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: nsmb-docker
+          package-type: container
+          min-versions-to-keep: 10
+          token: ${{ secrets.GITHUB_TOKEN }}
