@@ -17,17 +17,29 @@ RUN apt-get update && apt-get install -y \
 # Use BuildKit-provided TARGETARCH (amd64 or arm64)
 ARG TARGETARCH
 
-# Map TARGETARCH → ARCH (x86_64 / aarch64) for toolchain download
-RUN if [ "$TARGETARCH" = "amd64" ]; then ARCH=x86_64; \
-    elif [ "$TARGETARCH" = "arm64" ]; then ARCH=aarch64; \
-    else echo "Unsupported TARGETARCH=$TARGETARCH" && exit 1; fi && \
+# Map TARGETARCH to ARCH and save for later use
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        ARCH=x86_64; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        ARCH=aarch64; \
+    else \
+        echo "Unsupported TARGETARCH=$TARGETARCH" && exit 1; \
+    fi && \
+    echo "$ARCH" > /.arch && \
     curl -L -o /tmp/arm-toolchain.tar.xz \
-      "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi.tar.xz" && \
+        "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi.tar.xz" && \
     tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
     rm /tmp/arm-toolchain.tar.xz
 
-# Add toolchain to PATH
-ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-*/bin:${PATH}"
+# Set ARCH as environment variable for reuse in later layers
+RUN echo "export ARCH=$(cat /.arch)" >> /etc/bash.bashrc
+
+# Add toolchain to PATH using the saved ARCH value
+RUN ARCH=$(cat /.arch) && \
+    echo "PATH=\"/opt/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi/bin:\$PATH\"" >> /etc/environment
+
+# For non-shell contexts, you can also set both possible paths
+ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:/opt/arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-eabi/bin:${PATH}"
 
 # Install NDSpy
 RUN pip install --break-system-packages ndspy
