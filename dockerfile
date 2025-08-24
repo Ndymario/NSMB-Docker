@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y software-properties-common && \
 # Install updates and curl/xz-utils
 RUN apt-get update && apt-get install -y curl xz-utils && rm -rf /var/lib/apt/lists/*
 
-# Download and install Arm GNU Toolchain 14.3 Rel1
+# Download and install Arm GNU Toolchain 14.3
 RUN curl -L -o /tmp/arm-toolchain.tar.xz \
     https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz && \
     tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
@@ -34,16 +34,25 @@ ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:${PATH}"
 # Install NDSpy
 RUN pip install --break-system-packages ndspy
 
-# Download and extract prebuilt NCPatcher release (v1.0.9)
-RUN mkdir -p /opt/NCPatcher && \
-    curl -L https://github.com/TheGameratorT/NCPatcher/releases/download/v1.0.9/ncpatcher_v1.0.9_linux_x64.tgz \
-      | tar -xz -C /opt/NCPatcher
+# Clone the latest NCPatcher and build it
+RUN git clone https://github.com/TheGameratorT/NCPatcher.git /opt/NCPatcher && \
+    mkdir /opt/NCPatcher/build && \
+    cd /opt/NCPatcher/build && \
+    cmake ../ -DCMAKE_BUILD_TYPE=Release && \
+    make
+
+# Add to PATH
+ENV PATH="/opt/NCPatcher/build:${PATH}"
 
 # Clone the latest NSMB Code Reference
 RUN git clone https://github.com/MammaMiaTeam/NSMB-Code-Reference.git /opt/NSMB-Code-Reference/
 
-# Add to PATH
-ENV PATH="/opt/NCPatcher/ncpatcher_v1.0.9_linux_x64:${PATH}"
+# Copy scripts & NSMB-Docker NCPatcher configuration
+RUN mkdir -p /app/scripts
+COPY ./scripts/ /app/scripts
+COPY ./arm9.json /app/
+COPY ./buildrules.txt /app/
+COPY ./ncpatcher.json /app/
 
 # Set default working directory
 WORKDIR /workspace
@@ -52,4 +61,4 @@ WORKDIR /workspace
 VOLUME /data
 
 # Run the main Python script
-CMD ["python3", "/workspace/scripts/nsmb.py"]
+CMD ["python3", "/app/scripts/nsmb.py"]
