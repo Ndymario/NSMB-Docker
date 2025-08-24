@@ -22,12 +22,22 @@ RUN apt-get update && apt-get install -y software-properties-common && \
 # Install updates and curl/xz-utils
 RUN apt-get update && apt-get install -y curl xz-utils && rm -rf /var/lib/apt/lists/*
 
-# Download and install Arm GNU Toolchain 14.3
-ARG ARCH
-ENV TOOLCHAIN_URL=https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi.tar.xz
-RUN curl -L -o /tmp/arm-toolchain.tar.xz ${TOOLCHAIN_URL} && \
+# BuildKit sets TARGETARCH automatically (amd64/arm64)
+ARG TARGETARCH
+# Allow user to override ARCH explicitly
+ARG ARCH=""
+
+RUN if [ -z "$ARCH" ]; then \
+      if [ "$TARGETARCH" = "amd64" ]; then ARCH=x86_64; \
+      elif [ "$TARGETARCH" = "arm64" ]; then ARCH=aarch64; \
+      else echo "Unsupported TARGETARCH=$TARGETARCH" && exit 1; fi; \
+    fi && \
+    echo "Using ARCH=$ARCH" && \
+    curl -L -o /tmp/arm-toolchain.tar.xz \
+      "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi.tar.xz" && \
     tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
     rm /tmp/arm-toolchain.tar.xz
+
 
 # Add toolchain to PATH
 ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi/bin:${PATH}"
