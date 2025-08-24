@@ -13,12 +13,15 @@
 	"includes": [
 		["include", false],
 		["source", false],
-		["/opt/NSMB-Code-Reference/include", false]
+		["/opt/NSMB-Code-Reference/include", false],
+		["/data/include", false]
 	],
 	"regions": [{
 		"dest": "main",
 		"compress": false,
-		"sources": [["source", true]]
+		"sources": [
+			["source", true]
+		]
 	}],
 	
 	"arenaLo": "0x02065F10",
