@@ -20,11 +20,9 @@ scripts_folder = Path("/app/scripts/")
 clean_rom = Path("/data/nsmb.nds")
 arm9_json = Path("/app/arm9.json")
 ncpatcher_json = Path("/app/ncpatcher.json")
-buildrules_txt = Path("/app/buildrules.txt")
 sha256_hashes = {"nsmb": "9f67fef1b4c73e966767f6153431ada3751dc1b0da2c70f386c14a5e3017f354",
-                "arm9": "d84f376a8bb9f5958748c37297819e6d518dde13884d8e599b6b6c3d9c741888",
-                "ncpatcher": "29833ee67f0ffaaa61872c3456ce01eae1733a99c1869b851eff1a2f74176f5c",
-                "buildrules": "1e77a9db9625fa88e23230d6ed92956e40882cec10a496f9937344cbf885a957"}
+                "arm9": "036a0996316264fcaaaeb30dbea873da54162c241b8a7c4769617812d14511b0",
+                "ncpatcher": "bada73642dace72ada0bb1f945b909c49e2d964c1136c987b4622452697544d0"}
 
 local_include_folder = Path("/workspace/include")
 local_clean_rom = Path("/workspace/nsmb.nds")
@@ -81,9 +79,6 @@ if not include_folder.is_dir():
     shutil.move(local_include_folder, include_folder)
 
 # While it's likely intentional that the user used -v to overwrite these files: give a warning they have changed.
-if calculate_file_sha256(buildrules_txt) != sha256_hashes["buildrules"]:
-    print("[i] Looks like you have modified buildrules.txt using docker run. There be dragons!")
-
 if calculate_file_sha256(arm9_json) != sha256_hashes["arm9"]:
     print("[i] Looks like you have modified arm9.json using docker run. There be dragons!")
 
@@ -108,3 +103,5 @@ insert_files_cmd = [
 run_command(insert_files_cmd, Path("/app"))
 
 print("[i]\tAll done!")
+
+input("Press enter to exit...")

@@ -9,6 +9,8 @@ import glob
 import sys
 import os.path
 
+# NSMB-Docker: Change directory to workspace folder
+os.chdir("/workspace")
 
 # Headers to ignore the global to local header change
 libHeaders = ['stdio.h', 'stdarg.h']

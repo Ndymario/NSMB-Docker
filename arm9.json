@@ -11,8 +11,8 @@
 	"ld_flags": "${ld_flags}",
 	
 	"includes": [
-		["/app/include", false],
-		["/app/source", false],
+		["include", false],
+		["source", false],
 		["/opt/NSMB-Code-Reference/include", false],
 		["/data/include", false]
 	],
@@ -20,7 +20,7 @@
 		"dest": "main",
 		"compress": false,
 		"sources": [
-			["/app/source", true]
+			["source", true]
 		]
 	}],
 	
