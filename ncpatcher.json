@@ -11,8 +11,8 @@
 	
 	"arm7": {},
 	"arm9": {
-		"target": "arm9.json",
-		"build": "build"
+		"target": "/app/arm9.json",
+		"build": "/app/build"
 	},
 	
 	"pre-build": [],

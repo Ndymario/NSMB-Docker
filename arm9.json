@@ -11,15 +11,17 @@
 	"ld_flags": "${ld_flags}",
 	
 	"includes": [
-		["/workspace/include", false],
-		["/workspace/source", false],
+		["/app/include", false],
+		["/app/source", false],
 		["/opt/NSMB-Code-Reference/include", false],
 		["/data/include", false]
 	],
 	"regions": [{
 		"dest": "main",
 		"compress": false,
-		"sources": [["/workspace/source", true]]
+		"sources": [
+			["/app/source", true]
+		]
 	}],
 	
 	"arenaLo": "0x02065F10",

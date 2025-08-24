@@ -22,17 +22,14 @@ arm9_json = Path("/app/arm9.json")
 ncpatcher_json = Path("/app/ncpatcher.json")
 buildrules_txt = Path("/app/buildrules.txt")
 sha256_hashes = {"nsmb": "9f67fef1b4c73e966767f6153431ada3751dc1b0da2c70f386c14a5e3017f354",
-                "arm9": "ff1272fa2fc72350fdd1deee4873348a1bfa37c6eb944ddc46eed7f3ffa8c611",
+                "arm9": "d84f376a8bb9f5958748c37297819e6d518dde13884d8e599b6b6c3d9c741888",
                 "ncpatcher": "29833ee67f0ffaaa61872c3456ce01eae1733a99c1869b851eff1a2f74176f5c",
                 "buildrules": "1e77a9db9625fa88e23230d6ed92956e40882cec10a496f9937344cbf885a957"}
 
 local_include_folder = Path("/workspace/include")
 local_clean_rom = Path("/workspace/nsmb.nds")
-local_arm9_json = Path("/workspace/arm9.json")
-local_ncpatcher_json = Path("/workspace/ncpatcher.json")
-local_buildrules_txt = Path("/workspace/buildrules.txt")
 
-local_code_rom = Path("/workspace/temp.nds")
+local_code_rom = Path("/app/temp.nds")
 local_final_rom = Path("/workspace/final.nds")
 
 
@@ -73,7 +70,7 @@ if not clean_rom.is_file():
 # If the includes have not been copied to the data volume, convert & try to now
 if not include_folder.is_dir():
     if not local_include_folder.is_dir():
-        raise FileNotFoundError("[!]\tCould not find the NitroSDK/Nitro System includes (Error Code 4)")
+        raise FileNotFoundError("[!]\tCould not find the NitroSDK/Nitro System includes folder (Error Code 4)")
     
     convert_sdk_cmd = [
         sys.executable, 'scripts/convert_sdk.py'
@@ -83,24 +80,15 @@ if not include_folder.is_dir():
 
     shutil.move(local_include_folder, include_folder)
 
-# Copy the NCPatcher related files into the current workspace. Otherwise, warn that whatever is in the workspace is being used.
-if local_buildrules_txt.is_file() and calculate_file_sha256(local_buildrules_txt) != sha256_hashes["buildrules"]:
-    print("[i]\tWarning: the buildrules.txt in this folder is not the NSMB-Docker one. There be dragons!")
+# While it's likely intentional that the user used -v to overwrite these files: give a warning they have changed.
+if calculate_file_sha256(buildrules_txt) != sha256_hashes["buildrules"]:
+    print("[i] Looks like you have modified buildrules.txt using docker run. There be dragons!")
 
-else:
-    shutil.copyfile(buildrules_txt, local_buildrules_txt)
+if calculate_file_sha256(arm9_json) != sha256_hashes["arm9"]:
+    print("[i] Looks like you have modified arm9.json using docker run. There be dragons!")
 
-if local_arm9_json.is_file() and calculate_file_sha256(local_arm9_json) != sha256_hashes["arm9"]:
-    print("[i]\tWarning: the arm9.json in this folder is not the NSMB-Docker one. There be dragons!")
-
-else:
-    shutil.copyfile(arm9_json, local_arm9_json)
-
-if local_ncpatcher_json.is_file() and calculate_file_sha256(local_ncpatcher_json) != sha256_hashes["ncpatcher"]:
-    print("[i]\tWarning: the ncpatcher.json in this folder is not the NSMB-Docker one. There be dragons!")
-
-else:
-    shutil.copyfile(ncpatcher_json, local_ncpatcher_json)
+if calculate_file_sha256(ncpatcher_json) != sha256_hashes["ncpatcher"]:
+    print("[i] Looks like you have modified ncpatcher.json using docker run. There be dragons!")
 
 # Apply code patches via insert_code.py (Thanks Gamerator!)
 insert_code_cmd = [
@@ -109,7 +97,7 @@ insert_code_cmd = [
         "--temp-dir", "nsmb"
     ]
 
-run_command(insert_code_cmd, Path("/workspace/"))
+run_command(insert_code_cmd, Path("/app"))
 
 # Bundle ROM contents into final .nds via insert_files.py (Thanks Gamerator!)
 insert_files_cmd = [
@@ -117,13 +105,6 @@ insert_files_cmd = [
         local_code_rom, local_final_rom,
     ]
 
-run_command(insert_files_cmd, Path("/workspace/"))
-
-# Clean up the temp stuff
-if local_code_rom.is_file():
-    os.remove(local_code_rom)
-
-if Path("/workspace/nsmb").is_dir():
-    shutil.rmtree("/workspace/nsmb")
+run_command(insert_files_cmd, Path("/app"))
 
 print("[i]\tAll done!")

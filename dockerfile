@@ -23,21 +23,31 @@ RUN apt-get update && apt-get install -y software-properties-common && \
 RUN apt-get update && apt-get install -y curl xz-utils && rm -rf /var/lib/apt/lists/*
 
 # Download and install Arm GNU Toolchain 14.3
-RUN curl -L -o /tmp/arm-toolchain.tar.xz \
-    https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz && \
+ARG ARCH
+ENV TOOLCHAIN_URL=https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi.tar.xz
+RUN curl -L -o /tmp/arm-toolchain.tar.xz ${TOOLCHAIN_URL} && \
     tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
     rm /tmp/arm-toolchain.tar.xz
 
 # Add toolchain to PATH
-ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:${PATH}"
+ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-${ARCH}-arm-none-eabi/bin:${PATH}"
 
 # Install NDSpy
 RUN pip install --break-system-packages ndspy
 
-# Clone the latest NCPatcher and build it
+# Clone the NCPatcher repo and build NCPatcher
+ARG NCPATCHER_TAG=""
+# Clone the repo and checkout specified tag or latest
 RUN git clone https://github.com/TheGameratorT/NCPatcher.git /opt/NCPatcher && \
-    mkdir /opt/NCPatcher/build && \
-    cd /opt/NCPatcher/build && \
+    cd /opt/NCPatcher && \
+    if [ -z "$NCPATCHER_TAG" ]; then \
+        git fetch --tags && \
+        LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`) && \
+        git checkout "$LATEST_TAG"; \
+    else \
+        git checkout "$NCPATCHER_TAG"; \
+    fi && \
+    mkdir build && cd build && \
     cmake ../ -DCMAKE_BUILD_TYPE=Release && \
     make
 
@@ -54,8 +64,11 @@ COPY ./arm9.json /app/
 COPY ./buildrules.txt /app/
 COPY ./ncpatcher.json /app/
 
+# Create the build folder
+RUN mkdir /app/build
+
 # Set default working directory
-WORKDIR /workspace
+WORKDIR /app
 
 # Volume to store the converted SDK and a clean NSMB ROM for multi-project use
 VOLUME /data
