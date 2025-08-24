@@ -14,7 +14,7 @@ A simple all-in-one solution for setting up the [NSMB Code Mod Template](https:/
 4. Copy the contents of the include folder from Nitro System into your new include folder
 5. Place your ROM of NSMB into the root of your project.
 6. Rename your ROM to `nsmb.nds`
-7. [TODO: Update with step to pull the image from GitHub]
+7. Pull the latest container using `docker pull ghcr.io/ndymario/nsmb-docker`
 8. Run the container using `docker run -v ./source:/app/source -v ./nitrofs:/app/nitrofs -v "$PWD:/workspace" -v nsmb-data:/data nsmb`
 
 ## Other Info
