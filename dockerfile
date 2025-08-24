@@ -46,8 +46,8 @@ ENV PATH="/opt/NCPatcher/build:${PATH}"
 # Optional: clone NSMB Code Reference (latest main)
 RUN git clone https://github.com/MammaMiaTeam/NSMB-Code-Reference.git /opt/NSMB-Code-Reference/
 
-WORKDIR /workspace
+WORKDIR /app
 
 VOLUME /data
 
-CMD ["python3", "/workspace/scripts/nsmb.py"]
+CMD ["python3", "/app/scripts/nsmb.py"]
