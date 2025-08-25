@@ -25,9 +25,8 @@ A simple all-in-one solution for setting up the [NSMB Code Mod Template](https:/
 ### Build Flags
 By default, the image that is published fetches the latest NCPatcher (by tag) and latest NSMB Code Reference (by commit hash). I have created various build flags for specifying a specific release to use.
 
-- `ARCH`: `x86_64` or `aarch64` for what architecture of the ARM toolchain should be downloaded to the image.
-- `NCPATCHER_TAG`: specifies what release tag NCPatcher should be cloned from (default is latest)
-- `CODE_TEMPLATE_COMMIT`: specifies what commit hash that the code template will be at (default is latest)
+- `NCP_REF`: specifies a spcific version of NCPatcher that should be cloned from (default is latest tag). Valid options include: a tag, commit hash (short/long), or branch.
+- `CODE_TEMPLATE_COMMIT`: specifies what commit hash that the code template will be at (default is latest commit)
 
 For example, if you wanted to use `v1.0.9` of NCPatcher with the NSMB Code Reference at commit `b4e7950` with `aarch64`, your build command would look like:
 ```

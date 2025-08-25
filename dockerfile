@@ -44,21 +44,31 @@ ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:/opt/arm-gnu
 # Install NDSpy
 RUN pip install --break-system-packages ndspy
 
-# Clone the NCPatcher repo and build NCPatcher
-ARG NCPATCHER_TAG=""
-# Clone the repo and checkout specified tag or latest
+# Accept a ref that can be a tag, commit hash (short/long), or branch.
+ARG NCP_REF=""
+
+# Clone and build NCPatcher
 RUN git clone https://github.com/TheGameratorT/NCPatcher.git /opt/NCPatcher && \
     cd /opt/NCPatcher && \
-    if [ -z "$NCPATCHER_TAG" ]; then \
-        git fetch --tags && \
-        LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`) && \
-        git checkout "$LATEST_TAG"; \
+    if [ -z "$NCP_REF" ]; then \
+      git fetch --tags --quiet && \
+      LATEST_TAG="$(git describe --tags "$(git rev-list --tags --max-count=1)")" && \
+      echo "Using latest tag: $LATEST_TAG" && \
+      git checkout --detach "$LATEST_TAG"; \
     else \
-        git checkout "$NCPATCHER_TAG"; \
+      echo "Using provided ref: $NCP_REF" && \
+      # Ensure we have all refs locally (tags + branches)
+      git fetch --quiet --tags origin "+refs/heads/*:refs/remotes/origin/*" "+refs/tags/*:refs/tags/*" && \
+      # Try to checkout directly (works for tags/branches/commits if present)
+      git checkout --detach "$NCP_REF" || \
+      ( echo "Ref not present locally, fetching it..." && \
+        git fetch --quiet origin "$NCP_REF" && \
+        git checkout --detach FETCH_HEAD ); \
     fi && \
     mkdir build && cd build && \
     cmake ../ -DCMAKE_BUILD_TYPE=Release && \
     make
+
 
 ENV PATH="/opt/NCPatcher/build:${PATH}"
 
