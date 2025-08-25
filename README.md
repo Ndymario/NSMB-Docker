@@ -9,17 +9,23 @@ A simple all-in-one solution for setting up the [NSMB Code Mod Template](https:/
 
 ## How-to Use
 1. Create a folder named `include` in the root of your project.
-2. Create a folder named `nitrofs` and insert the `banner.bin` from your ROM. (Or you may use a custom one)
-3. Copy the contents of the include folder from the NitroSDK into your new include folder
-4. Copy the contents of the include folder from Nitro System into your new include folder
-5. Place your ROM of NSMB into the root of your project.
-6. Rename your ROM to `nsmb.nds`
-7. Pull the latest container using `docker pull ghcr.io/ndymario/nsmb-docker`
-8. Run the container using `docker run -v ./source:/app/source -v ./nitrofs:/app/nitrofs -v "$PWD:/workspace" -v nsmb-data:/data ghcr.io/ndymario/nsmb-docker`
+2. Copy the contents of the include folder from the NitroSDK into your new include folder
+3. Copy the contents of the include folder from Nitro System into your new include folder
+4. Place your ROM of NSMB into the root of your project.
+5. Rename your ROM to `nsmb.nds`
+6. Pull the latest container using `docker pull ghcr.io/ndymario/nsmb-docker`
+7. Run the container using `docker run -v ./source:/app/source -v ./nitrofs:/app/nitrofs -v "$PWD:/workspace" -v nsmb-data:/data ghcr.io/ndymario/nsmb-docker`
 
-## Other Info
-- Placing files inside of your `nitrofs` folder will have them appended in the ROM. For example, `nitrofs/foo/bar` will add a folder named `foo` containing a file named `bar` into the ROM.
-> Replacing files in the ROM coming in a future version!
+## Replacing and Adding Files
+NSMB-Docker can both replace files that exist in the ROM and append new files to the ROM by using a special folder `nitrofs` that you can make in your project root.
+
+To replace existing files in the ROM, recreate the file path in the `nitrofs` folder.
+For example, to replace `banner.bin`, you would place your custom `banner.bin` at `nitrofs/banner.bin`.
+
+To add new files to the ROM:
+1. Create a folder named `z_new` inside of the `nitrofs` folder (`nitrofs/z_new`).
+2. As best practice, create another folder inside of this one with the short name of your mod (`nitrofs/z_new/my_mod`).
+3. Any files/folders located in your mod folder will be appended to the ROM (the log will show what file ids they were given).
 
 ## Advanced Usage
 ### Build Flags

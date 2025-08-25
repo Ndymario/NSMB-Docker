@@ -10,6 +10,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Insert code into Nintendo DS ROM')
     parser.add_argument('input_rom', help='Input ROM file path')
     parser.add_argument('output_rom', help='Output ROM file path')
+    parser.add_argument('-l', '--language', default='en',
+                       choices=['en', 'fr', 'ge', 'it', 'jp', 'sp', 'pt', 'ko', 'ch'],
+                       help='Game language (default: en)')
     parser.add_argument('-v', '--verbose', action='store_true',
                        help='Enable verbose output')
     parser.add_argument('--temp-dir', default='__tmp',
@@ -20,10 +23,12 @@ def parse_arguments():
 args = parse_arguments()
 input_rom_filename = args.input_rom
 output_rom_filename = args.output_rom
+language = args.language
 verbose = args.verbose
 outputdir = args.temp_dir
 ov9dir = outputdir + "/overlay9"
 ov7dir = outputdir + "/overlay7"
+supported_languages = ['en', 'fr', 'ge', 'it', 'jp', 'sp', 'pt', 'ko', 'ch']
 
 def run_ncp():
     print("Running NCPatcher")
@@ -31,6 +36,10 @@ def run_ncp():
     args = ["ncpatcher"]
     if verbose:
         args.append("--verbose")
+
+    # Add the GAME_LANGUAGE macro definition
+    language_upper = language.upper()
+    args.extend(["--define", f"GAME_LANGUAGE_{language_upper}"])
 
     subprocess.run(args)
 
@@ -109,6 +118,10 @@ def pack():
     rom.saveToFile(output_rom_filename, updateDeviceCapacity=True)
 
 def main():
+    print(f"Using language: {language}")
+    if language not in supported_languages:
+        print(f"Warning: '{language}' is not a supported language. Supported: {', '.join(supported_languages)}")
+
     unpack()
     run_ncp()
     pack()
