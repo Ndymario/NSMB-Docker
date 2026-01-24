@@ -32,6 +32,13 @@ local_final_rom = Path("/workspace/final.nds")
 
 configuration = Path("/workspace/nsmb.yaml")
 
+try:
+    # Keep logs readable when stdout isn't a TTY (e.g., docker run without -t)
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+except AttributeError:
+    pass
+
 workspace_root = Path("/workspace")
 
 
@@ -214,4 +221,5 @@ run_command(insert_files_cmd, Path("/app"))
 
 print("\n\n[i] All done!\n")
 
-input("Press enter to exit...")
+if sys.stdin.isatty():
+    input("Press enter to exit...")

@@ -44,6 +44,9 @@ ENV PATH="/opt/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:/opt/arm-gnu
 # Install NDSpy & PyYAML
 RUN pip install --break-system-packages ndspy pyyaml
 
+# Ensure python output is unbuffered for clearer logs in non-interactive runs
+ENV PYTHONUNBUFFERED=1
+
 # Accept a ref that can be a tag, commit hash (short/long), or branch.
 ARG NCP_REF=""
 
