@@ -36,7 +36,7 @@ By default, the image that is published fetches the latest NCPatcher (by tag) an
 
 For example, if you wanted to use `v1.0.9` of NCPatcher with the NSMB Code Reference at commit `b4e7950` with `aarch64`, your build command would look like:
 ```
-docker build --build-arg ARCH=aarch64 --build-arg NCPATCHER_TAG=v1.0.9 --build-arg CODE_TEMPLATE_COMMIT=b4e7950 . -t nsmb
+docker build --build-arg ARCH=aarch64 --build-arg NCP_REF=v1.0.9 --build-arg CODE_TEMPLATE_COMMIT=b4e7950 . -t nsmb
 ```
 
 ### File Paths
