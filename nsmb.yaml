@@ -1,0 +1,64 @@
+# This is an example NSMB-Docker YAML file. Feel free to modify it to suit your project!
+---
+# Metadata
+name: Your super cool mod name
+author: You, of course
+
+# A link to your project's GitHub. If you don't have one, just put False (capital F matters!)
+repo: https://github.com/Ndymario/NSMB-Docker
+
+settings:
+  # What version of NCPatcher should build your project. Accepts: tags/branches/commit hashes (long/short).
+  # If unsure, set to docker.
+  ncp_ver: docker
+
+  # What version of the Code Reference should be used. Accepts: commit hash (long/short).
+  # If unsure, set to docker.
+  code_ref_ver: docker
+
+  # Arguments accepted by the insert code script.
+  insert_code:
+    # Sets the path to the input ROM.
+    # If unsure, set to docker
+    input_rom: docker
+
+    # Sets the path to the output ROM.
+    # If unsure, set to docker
+    output_rom: docker
+
+    # Sets what language you are building your ROM for.
+    # If unsure, set to docker
+    language: docker
+
+    # Enables verbose output from NCPatcher.
+    # If unsure, set to False
+    verbose: False
+
+    # Sets the temporary directory for the extracted ROM files.
+    # If unsure, set to docker
+    temp_dir: docker
+
+  insert_files:
+    # Sets the path to the input ROM.
+    # If unsure, set to docker
+    input_rom: docker
+
+    # Sets the path to the output ROM.
+    # If unsure, set to docker
+    output_rom: docker
+
+    # Sets what language you are building your ROM for.
+    # If unsure, set to docker
+    language: docker
+
+    # Sets the path to the nitrofs folder.
+    # If unsure, set to docker
+    nitrofs_dir: docker
+
+    # Sets the path overrides file path.
+    # If unsure, set to docker
+    overrides_file: docker
+
+    # Sets the output path for the constexpr fid.hpp file.
+    # If unsure, set to docker
+    fid_output: docker
